@@ -2,7 +2,7 @@
 
 esta es una aplicacion web, la cual devuelve recursos ubicados en el servidor.
 
-puedes ver el web service [aqui](https://powerful-mountain-21359.herokuapp.com/ )
+puedes ver el web service [aqui](https://agile-beyond-28846.herokuapp.com/springapp/inicio )
 
 ## Comenzando 🚀
 
