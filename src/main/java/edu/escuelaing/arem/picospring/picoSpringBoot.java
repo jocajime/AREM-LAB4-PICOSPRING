@@ -1,6 +1,7 @@
 package edu.escuelaing.arem.picospring;
 
 
+import edu.escuelaing.arem.header.headerHttp;
 import edu.escuelaing.arem.server.HttpServer;
 import edu.escuelaing.arem.server.Processor;
 
@@ -16,6 +17,7 @@ public class picoSpringBoot implements Processor {
     private static picoSpringBoot _instance = new picoSpringBoot();
     private Map<String, Method> requestProcessors = new HashMap();
     private HttpServer hserver;
+    private headerHttp headers = new headerHttp ();
 
     private picoSpringBoot(){}
 
@@ -35,7 +37,6 @@ public class picoSpringBoot implements Processor {
         for (Method m: componentMethods){
             if(m.isAnnotationPresent (RequestMapping.class)){
                 requestProcessors.put(m.getAnnotation(RequestMapping.class).value() ,m);
-
             }
         }
 
@@ -44,19 +45,30 @@ public class picoSpringBoot implements Processor {
 
     @Override
     public String handle(String path, HttpRequest req, HttpResponse resp) {
+        String respuesta = "";
         for(String key: requestProcessors.keySet ()){
             if (path.startsWith (key)) {
                 try {
-                    requestProcessors.get (key).invoke (null,null);
+                    if(path.contains (".")) {
+                        switch (path.substring (path.indexOf ("."))) {
+                            case ".png":
+                                respuesta = headers.validOkHttpHeaderpng () + requestProcessors.get (key).invoke (null, null).toString ();
+                            default:
+                                respuesta = headers.validOkHttpHeaderhtml () + requestProcessors.get (key).invoke (null, null).toString ();
+                        }
+                    }else{
+                        respuesta = headers.validOkHttpHeaderhtml () + requestProcessors.get (key).invoke (null, null).toString ();
+                    }
                 } catch (IllegalAccessException e) {
                     e.printStackTrace ();
                 } catch (InvocationTargetException e) {
                     e.printStackTrace ();
                 }
 
+
             }
         }
-        return "";
+        return respuesta;
     }
 
     public void startServer() throws IOException {
@@ -66,6 +78,7 @@ public class picoSpringBoot implements Processor {
     }
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
+        picoSpringBoot.getInstance ().loadComponents (args);
         picoSpringBoot.getInstance().startServer ();
     }
 }
